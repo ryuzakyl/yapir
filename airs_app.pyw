@@ -805,9 +805,9 @@ class AirsWindow(QtWidgets.QMainWindow, Ui_airsWindow):
         self.verif_test_worker.polynomial_order = k
 
         # connecting the signals of the worker thread with slots in GUI
-        QtCore.QObject.connect(self.verif_test_worker, QtCore.SIGNAL('verification_started(int, int, QString)'), self.onVerificationStarted)
-        QtCore.QObject.connect(self.verif_test_worker, QtCore.SIGNAL('comparison_finished(int, int, QString, QString, int, QString)'), self.onComparisonFinished)
-        QtCore.QObject.connect(self.verif_test_worker, QtCore.SIGNAL('verification_finished(int, int, int, int)'), self.onVerificationFinished)
+        self.verif_test_worker.verification_started.connect(self.onVerificationStarted)
+        self.verif_test_worker.comparison_finished.connect(self.onComparisonFinished)
+        self.verif_test_worker.verification_finished.connect(self.onVerificationFinished)
 
     def onVerificationStarted(self, db_type, enc_type, str_thres):
         self.resultsTextEdit.setTextBackgroundColor(QtGui.QColor(255, 255, 255))
