@@ -1,3 +1,12 @@
+# pycharm project folder
+.idea
+
+# local databases for tests
+databases
+
+# cached mf matrices
+encoding/mfs
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
