@@ -9,7 +9,6 @@ from recognition.iris_recognition_algorithm import RecognitionAlgorithm
 
 # performs 1-to-1 comparisons
 class VerificationTest(QtCore.QThread):
-
     # type of database in which the test will be performed
     _db_type = None
 

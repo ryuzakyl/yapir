@@ -138,7 +138,6 @@ def generate_heatmap(norm_img):
 #ToDo: Python code here. Optimize it with cython or anything like that.
 #ToDo: Optimize function. It has very very bad programming!!!
 def gabor_convolve(im, n_scale, min_wave_length, mult, sigma_onf):
-
     # getting image dimensions
     rows, cols = im.shape
 
@@ -168,7 +167,7 @@ def gabor_convolve(im, n_scale, min_wave_length, mult, sigma_onf):
 
     i = 0
     while i < radius_count:
-        radius[i] = i / n_data // 2 / 2
+        radius[i] = i / (n_data // 2) / 2
         i += 1
 
     radius[0] = 1

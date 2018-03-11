@@ -61,7 +61,7 @@ def load_code(img_name, db_type, encoding_method, use_mask, alg):
 
     # loading the image
     img_path = base_path + IMAGES_PATH + img_name
-    img = cv2.imread(img_path, cv2.CV_LOAD_IMAGE_UNCHANGED)
+    img = cv2.imread(img_path, cv2.IMREAD_UNCHANGED)
 
     # creating proper mask
     if use_mask:
