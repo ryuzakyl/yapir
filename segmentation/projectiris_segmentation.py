@@ -127,6 +127,7 @@ def find_pupil(img):
 
     # 2 of padding
     radius -= 2
+    radius = max(0, radius)
 
     #ToDo: Read below.
     # Here i'm going to draw a circle instead of applying sobel again. Instead of
