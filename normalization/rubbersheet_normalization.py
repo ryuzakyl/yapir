@@ -23,15 +23,15 @@ def normalize_iris(img, angular_resolution, radial_resolution, pupil_center, pup
     radii = radial_resolution            # iris width (the width of the iris ring)
     radii2 = radii + 2                   # radial resolution plus 2
 
-    img_height = img.shape[0]   # getting the image height
+    img_height, img_width = img.shape   # getting the image height
     xp, yp = pupil_center       # (xp, yp) is the pupil center
     xi, yi = iris_center        # (xi, yi) is the iris center
     rp = pupil_radius           # rp is the radius of the pupil
     ri = iris_radius            # ri is the radius of the iris
 
     # creating the normalized image
-    norm_image = np.empty((radii, angles), np.uint8)
-    mask_image = np.empty((radii, angles), np.uint8)     # 1 if valid pixel, 0 otherwise
+    norm_image = np.zeros((radii, angles), np.uint8)
+    mask_image = np.zeros((radii, angles), np.uint8)     # 1 if valid pixel, 0 otherwise
 
     # computing centers offset
     ox = xp - xi    # offstet of pupil and iris centers in the x axis
@@ -74,7 +74,10 @@ def normalize_iris(img, angular_resolution, radial_resolution, pupil_center, pup
             if 0 < row < radii2 - 1:
                 #getting pixel location in the original image
                 x = int(xp + r * cos_theta)
+                x = 0 if x < 0 else img_width - 1 if x >= img_width else x
+
                 y = int(yp - r * sin_theta)
+                y = 0 if y < 0 else img_height - 1 if y >= img_height else y
 
                 #getting the pixel value
                 pixel_value = img.item(y, x)    # indexed first by rows, then by columns
