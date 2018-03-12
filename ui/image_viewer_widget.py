@@ -61,8 +61,7 @@ class ImageViewerWidget(QtWidgets.QLabel, object):
         self.image_array = img_data
 
         # setting the new qimage
-        new_qimage = QtGui.QImage(img_data.data, width, height, format)
-        self.qimage = new_qimage
+        self.qimage = QtGui.QImage(img_data.data, width, height, format)
 
         # resizing the image viewer widget
         self.setFixedSize(QtCore.QSize(self.qimage.width(), self.qimage.height()))
@@ -91,15 +90,12 @@ class ImageViewerWidget(QtWidgets.QLabel, object):
             "./iris-images",
             "bmp files (*.bmp)\njpg files (*.jpg)\nAll files (*.*)",
             "All files (*.*)",
-            QtWidgets.QFileDialog.DontUseNativeDialog
+            options=QtWidgets.QFileDialog.DontUseNativeDialog
         )
 
         # if no image was selected
         if not image_path:
             return 0
-
-        #converting the image_path in a Python string
-        # image_path = str(image_path)
 
         #loading image as numpy array in gray scale
         self.image_array = cv2.imread(str(image_path), cv2.IMREAD_GRAYSCALE)
@@ -133,21 +129,21 @@ class ImageViewerWidget(QtWidgets.QLabel, object):
         self.update()
 
     def saveImage(self):
-        image_path = QtWidgets.QFileDialog.getSaveFileName(
+        image_path, _ = QtWidgets.QFileDialog.getSaveFileName(
             self,
             "Save Image",
             ".",
             "bmp files (*.bmp)\njpg files (*.jpg)\nAll files (*.*)",
             "All files (*.*)",
+            options=QtWidgets.QFileDialog.DontUseNativeDialog
         )
 
         if not image_path:
-            return 0
+            return False
 
-        #saving the image
-        path = str(image_path)
-        cv2.imwrite(path, self.image_array)
-        return 1
+        # save the image
+        cv2.imwrite(image_path, self.image_array)
+        return True
 
     #-------------------------Overrided methods--------------------------
 
