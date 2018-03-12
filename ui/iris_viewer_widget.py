@@ -47,74 +47,69 @@ POINT_SIZE = 3.0
 
 
 class IrisViewerWidget(ImageViewerWidget, object):
-
-    #signal emitted when pupil center is set
+    # signal emitted when pupil center is set
     pupilCenterSet = QtCore.pyqtSignal()
 
-    #signal emitted when pupil border is set
+    # signal emitted when pupil border is set
     pupilBorderSet = QtCore.pyqtSignal()
 
-    #signal emitted when pupil is detected
+    # signal emitted when pupil is detected
     pupilDetected = QtCore.pyqtSignal()
 
-    #signal emitted when iris center is set
+    # signal emitted when iris center is set
     irisCenterSet = QtCore.pyqtSignal()
 
-    #signal emitted when iris border is set
+    # signal emitted when iris border is set
     irisBorderSet = QtCore.pyqtSignal()
 
-    #signal emitted when iris is detected
+    # signal emitted when iris is detected
     irisDetected = QtCore.pyqtSignal()
 
-    #signal emitted when upper eyelid is detected
+    # signal emitted when upper eyelid is detected
     upperEyelidDetected = QtCore.pyqtSignal()
 
-    #signal emitted when lower eyelid is detected
+    # signal emitted when lower eyelid is detected
     lowerEyelidDetected = QtCore.pyqtSignal()
 
-    #signal emitted when iris is segmented
+    # signal emitted when iris is segmented
     irisSegmented = QtCore.pyqtSignal()
 
-    #signal emitted when pupil center changes
+    # signal emitted when pupil center changes
     pupilCenterChanged = QtCore.pyqtSignal()
 
-    #signal emitted when pupil border changes
+    # signal emitted when pupil border changes
     pupilBorderChanged = QtCore.pyqtSignal()
 
-    #signal emitted when iris center changes
+    # signal emitted when iris center changes
     irisCenterChanged = QtCore.pyqtSignal()
 
-    #signal emitted when iris border changes
+    # signal emitted when iris border changes
     irisBorderChanged = QtCore.pyqtSignal()
 
-    #signal emitted when the widget is "resetted" for detection
+    # signal emitted when the widget is "resetted" for detection
     viewerReset = QtCore.pyqtSignal()
 
-    #----------------------------Initializer------------------------------
-
-    def __init__(self, parent = None):
-        #calling base initializers
+    def __init__(self, parent=None):
+        # calling base initializers
         super(IrisViewerWidget, self).__init__(parent)
 
-        #necessary and don't know why
+        # necessary and don't know why
         self.resize(parent.size())
 
-        #enabling mouse tracking (for the hover event, etc.)
+        # enabling mouse tracking (for the hover event, etc.)
         self.setMouseTracking(True)
 
-        #setting focus policy
+        # setting focus policy
         self.setFocusPolicy(QtCore.Qt.NoFocus)
 
-        #setting the Iris Viewer Configuration
+        # setting the Iris Viewer Configuration
         self.__setIrisViewerConfiguration()
 
-        #setting the visual elements
+        # setting the visual elements
         self.__setVisualElements()
 
-        #adding a reset to the context menu
+        # adding a reset to the context menu
         self.enhanceContextMenu()
-
-    #----------------------------Properties------------------------------
 
     def isInAutomaticDetectionMode(self):
         return self.detection_mode == AUTOMATIC
