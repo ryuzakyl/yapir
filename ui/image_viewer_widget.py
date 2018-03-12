@@ -11,9 +11,17 @@ class ImageViewerWidget(QtWidgets.QLabel, object):
         #necessary and don't know why
         self.resize(parent.size())
 
-        self.qimage = None           #a qimage
-        self.image_array = None      #a numpy array data
-        self.image_name = ""       #image name
+        # QImage for the QtWidget
+        self.qimage = None
+
+        # numpy image array
+        self.image_array = None
+
+        # image name
+        self.image_name = None
+
+        # image path
+        self.image_path = None
 
         self.border_pen = QtGui.QPen(QtGui.QColor.fromRgb(100, 100, 100))
         self.border_pen.setStyle(QtCore.Qt.DashLine)
@@ -79,7 +87,7 @@ class ImageViewerWidget(QtWidgets.QLabel, object):
         self.context_menu = QtWidgets.QMenu(self)
 
         # add a Save Image Action
-        save_image_action = QtWidgets.QAction("&Save Image", self)
+        save_image_action = QtWidgets.QAction("Save &Image", self)
         save_image_action.triggered.connect(self.saveImage)
         self.context_menu.addAction(save_image_action)
 
@@ -97,28 +105,31 @@ class ImageViewerWidget(QtWidgets.QLabel, object):
         if not image_path:
             return 0
 
-        #loading image as numpy array in gray scale
+        # loading image as numpy array in gray scale
         self.image_array = cv2.imread(str(image_path), cv2.IMREAD_GRAYSCALE)
 
-        #if there was a problem loading the image
+        # if there was a problem loading the image
         if self.image_array is None:
             return 0
 
-        #setting the qimage
+        # setting the qimage
         self.qimage = QtGui.QImage(image_path)
 
-        #setting the image name
+        # setting image path
+        self.image_path = image_path
+
+        # setting the image name
         _, file_name = os.path.split(image_path)
         image_name, _ = os.path.splitext(file_name)
         self.setImageName(image_name)
 
-        #resizing the image viewer widget
+        # resizing the image viewer widget
         self.setFixedSize(QtCore.QSize(self.qimage.width(), self.qimage.height()))
 
         return 1
 
     def unloadImage(self):
-        #resetting images
+        # reset image(s) and image path
         self.qimage = None
         self.image_array = None
 

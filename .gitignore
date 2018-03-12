@@ -7,6 +7,9 @@ databases
 # cached mf matrices
 encoding/mfs
 
+# segmentation files locally generated
+*.seg
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]

@@ -527,44 +527,7 @@ class AirsWindow(QtWidgets.QMainWindow, Ui_airsWindow):
         if result != SUCCESS:
             QtWidgets.QMessageBox.about(self, "Error", "<h2>%s</h2>" % error_messages[result])
         else:
-            #resetting the viewer
-            self.irisViewer.reset()
-
-            #drawing control points in the iris image viewer
-            pupil_data = data[PUPIL_DATA]
-            iris_data = data[IRIS_DATA]
-            eyelids_data = data[EYELIDS_DATA]
-
-            #setting pupil control points
-            xp, yp = pupil_data[CENTER]
-            rp = pupil_data[RADIUS]
-            p_center = QtCore.QPointF(xp, yp)
-            p_border = QtCore.QPointF(xp + rp, yp)
-            self.irisViewer.setPupilCenter(p_center)
-            self.irisViewer.setPupilBorder(p_border)
-
-            #setting iris control points
-            xi, yi = iris_data[CENTER]
-            ri = iris_data[RADIUS]
-            i_center = QtCore.QPointF(xi, yi)
-            i_border = QtCore.QPointF(xi + ri, yi)
-            self.irisViewer.setIrisCenter(i_center)
-            self.irisViewer.setIrisBorder(i_border)
-
-            #setting eyelids
-            upper_eyelid_data, lower_eyelid_data = eyelids_data
-            p1_data, p2_data, p3_data = upper_eyelid_data
-            p1 = QtCore.QPointF(p1_data[0], p1_data[1])
-            p2 = QtCore.QPointF(p2_data[0], p2_data[1])
-            p3 = QtCore.QPointF(p3_data[0], p3_data[1])
-
-            p4_data, p5_data, p6_data = lower_eyelid_data
-            p4 = QtCore.QPointF(p4_data[0], p4_data[1])
-            p5 = QtCore.QPointF(p5_data[0], p5_data[1])
-            p6 = QtCore.QPointF(p6_data[0], p6_data[1])
-
-            self.irisViewer.setUpperEyelid(p1, p2, p3)
-            self.irisViewer.setLowerEyelid(p4, p5, p6)
+            self.irisViewer.update(data)
 
     def normalizeIris(self, eye_img):
         #getting rectangle dimensions

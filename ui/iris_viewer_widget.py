@@ -1,9 +1,15 @@
-from PyQt5 import QtCore, QtGui, QtWidgets
+import os
+import pickle
+from PyQt5 import (
+    QtCore,
+    QtWidgets
+)
 
 from ui.image_viewer_widget import ImageViewerWidget
 from ui.ui_circle import UiCircle
 from ui.ui_arc import UiArc
 
+from utils.iris_data_definitions import *
 from utils.math_utils import euclidean_distance_points
 
 #-------------------------------------------------------------------------------------------
@@ -314,10 +320,18 @@ class IrisViewerWidget(ImageViewerWidget, object):
     #------------------------------Methods-------------------------------
 
     def enhanceContextMenu(self):
-        #adding a Reset action
+        # add a Reset action
         reset_action = QtWidgets.QAction("&Reset", self)
         reset_action.triggered.connect(self.reset)
         self.context_menu.addAction(reset_action)
+
+        load_segmentation_action = QtWidgets.QAction("&Load Segmentation", self)
+        load_segmentation_action.triggered.connect(self.load_segmentation_data)
+        self.context_menu.addAction(load_segmentation_action)
+
+        save_segmentation_action = QtWidgets.QAction("&Save Segmentation", self)
+        save_segmentation_action.triggered.connect(self.save_segmentation_data)
+        self.context_menu.addAction(save_segmentation_action)
 
     def __setIrisViewerConfiguration(self):
         #by default the Iris Viewer is in AUTOMATIC detection mode
@@ -578,34 +592,159 @@ class IrisViewerWidget(ImageViewerWidget, object):
 
         #drawing pupil circle
         if self.isPupilDetected():
-            r_pupil = euclidean_distance_points(self.control_points[PUPIL_CENTER].getPosition(), \
-                                                self.control_points[PUPIL_BORDER].getPosition())
+            r_pupil = euclidean_distance_points(
+                self.control_points[PUPIL_CENTER].getPosition(),
+                self.control_points[PUPIL_BORDER].getPosition()
+            )
+
             self.pupil_circle.change(self.control_points[PUPIL_CENTER].getPosition(), r_pupil)
             self.pupil_circle.show()
 
         #drawing iris circle
         if self.isIrisDetected():
-            r_iris = euclidean_distance_points(self.control_points[IRIS_CENTER].getPosition(), \
-                                               self.control_points[IRIS_BORDER].getPosition())
+            r_iris = euclidean_distance_points(
+                self.control_points[IRIS_CENTER].getPosition(),
+                self.control_points[IRIS_BORDER].getPosition()
+            )
+
             self.iris_circle.change(self.control_points[IRIS_CENTER].getPosition(), r_iris)
             self.iris_circle.show()
 
         #drawing upper eyelid
         if self.isUpperEyelidDetected():
-            self.upper_eyelid_arc.change(self.control_points[UPPER_EYELID_1].getPosition(), \
-                                         self.control_points[UPPER_EYELID_2].getPosition(), \
-                                         self.control_points[UPPER_EYELID_3].getPosition(), \
-                                         self.qimage.width())
+            self.upper_eyelid_arc.change(
+                self.control_points[UPPER_EYELID_1].getPosition(),
+                self.control_points[UPPER_EYELID_2].getPosition(),
+                self.control_points[UPPER_EYELID_3].getPosition(),
+                self.qimage.width()
+            )
+
             self.upper_eyelid_arc.show()
 
         #drawing lower eyelid
         if self.isLowerEyelidDetected():
-            self.lower_eyelid_arc.change(self.control_points[LOWER_EYELID_1].getPosition(), \
-                                         self.control_points[LOWER_EYELID_2].getPosition(), \
-                                         self.control_points[LOWER_EYELID_3].getPosition(), \
-                                         self.qimage.width())
+            self.lower_eyelid_arc.change(
+                self.control_points[LOWER_EYELID_1].getPosition(),
+                self.control_points[LOWER_EYELID_2].getPosition(),
+                self.control_points[LOWER_EYELID_3].getPosition(),
+                self.qimage.width()
+            )
             self.lower_eyelid_arc.show()
 
-        #drawing control points (always)
+        # draw control points (always)
         for i in range(self.control_points_set_count):
             self.control_points[i].show()
+
+    def update(self, data):
+        # reset the viewer
+        self.reset()
+
+        # drawing control points in the iris image viewer
+        pupil_data = data[PUPIL_DATA]
+        iris_data = data[IRIS_DATA]
+        eyelids_data = data[EYELIDS_DATA]
+
+        # setting pupil control points
+        xp, yp = pupil_data[CENTER]
+        rp = pupil_data[RADIUS]
+        p_center = QtCore.QPointF(xp, yp)
+        p_border = QtCore.QPointF(xp + rp, yp)
+        self.setPupilCenter(p_center)
+        self.setPupilBorder(p_border)
+
+        # setting iris control points
+        xi, yi = iris_data[CENTER]
+        ri = iris_data[RADIUS]
+        i_center = QtCore.QPointF(xi, yi)
+        i_border = QtCore.QPointF(xi + ri, yi)
+        self.setIrisCenter(i_center)
+        self.setIrisBorder(i_border)
+
+        # setting eyelids
+        upper_eyelid_data, lower_eyelid_data = eyelids_data
+        p1_data, p2_data, p3_data = upper_eyelid_data
+        p1 = QtCore.QPointF(p1_data[0], p1_data[1])
+        p2 = QtCore.QPointF(p2_data[0], p2_data[1])
+        p3 = QtCore.QPointF(p3_data[0], p3_data[1])
+
+        p4_data, p5_data, p6_data = lower_eyelid_data
+        p4 = QtCore.QPointF(p4_data[0], p4_data[1])
+        p5 = QtCore.QPointF(p5_data[0], p5_data[1])
+        p6 = QtCore.QPointF(p6_data[0], p6_data[1])
+
+        self.setUpperEyelid(p1, p2, p3)
+        self.setLowerEyelid(p4, p5, p6)
+
+    def load_segmentation_data(self):
+        try:
+            # split in base path and file name
+            base_path, file_name = os.path.split(self.image_path)
+
+            # get image name
+            image_name, _ = os.path.splitext(file_name)
+
+            # pickled data of segmentation path
+            data_path = '{}/{}.seg'.format(base_path, image_name)
+
+            # load pickled segmentation data
+            with open(data_path, 'rb') as f:
+                data = pickle.load(f)
+
+                # update iris viewer
+                self.update(data)
+
+            QtWidgets.QMessageBox.information(self, "Information", "<h3>Segmentation data loaded</h3>")
+
+            return True
+        except Exception as e:
+            QtWidgets.QMessageBox.about(self, "Error", "<h3>Operation failed</h3>")
+
+            return False
+
+    def save_segmentation_data(self):
+        try:
+            # split in base path and file name
+            base_path, file_name = os.path.split(self.image_path)
+
+            # get image name
+            image_name, _ = os.path.splitext(file_name)
+
+            # build segmentation data
+            pupil = self.pupil_circle
+            iris = self.iris_circle
+            upper_eyelid = self.upper_eyelid_arc
+            lower_eyelid = self.lower_eyelid_arc
+            segmentation_data = (
+                # pupil info
+                ((pupil.center.x(), pupil.center.y()), pupil.radius),
+                # iris info
+                ((iris.center.x(), iris.center.y()), iris.radius),
+                # eyelids
+                (
+                    # upper eyelid
+                    (
+                        (upper_eyelid.p1.x(), upper_eyelid.p1.y()),
+                        (upper_eyelid.p2.x(), upper_eyelid.p2.y()),
+                        (upper_eyelid.p3.x(), upper_eyelid.p3.y()),
+                    ),
+                    (
+                        # lower eyelid
+                        (lower_eyelid.p1.x(), lower_eyelid.p1.y()),
+                        (lower_eyelid.p2.x(), lower_eyelid.p2.y()),
+                        (lower_eyelid.p3.x(), lower_eyelid.p3.y()),
+                    ),
+                )
+            )
+
+            # save pickled data of segmentation
+            data_path = '{}/{}.seg'.format(base_path, image_name)
+            with open(data_path, 'wb') as f:
+                pickle.dump(segmentation_data, f)
+
+            QtWidgets.QMessageBox.information(self, "Information", "<h3>Segmentation data stored</h3>")
+
+            return True
+        except Exception as e:
+            QtWidgets.QMessageBox.about(self, "Error", "<h3>Operation failed</h3>")
+
+            return False
